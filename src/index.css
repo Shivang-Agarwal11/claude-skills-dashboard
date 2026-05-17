@@ -217,9 +217,14 @@ body {
   align-items: center;
   gap: 0;
   height: 30px;
-  background: var(--ink);
+  background: #0f0f0f;
   padding: 0 28px;
   overflow: hidden;
+}
+
+[data-theme="dark"] .status-strip {
+  background: #0a0a0a;
+  border-top: 1px solid #2d2d2d;
 }
 
 .status-item {

@@ -20,3 +20,19 @@ export interface McpServer {
 }
 
 export type McpServersMap = Record<string, McpServer>
+
+export interface Plugin {
+  id: string
+  name: string
+  namespace: string
+  version: string
+  scope: 'user' | 'project'
+  projectPath?: string
+  installPath: string
+  installedAt: string
+  lastUpdated?: string
+  gitCommitSha?: string
+  description: string
+  skills: string[]
+  hasReadme: boolean
+}

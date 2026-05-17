@@ -1,8 +1,8 @@
 # Skills Control Panel
 
-> **The missing UI for Claude Code.** Browse, edit, create, and rename all your skills and MCP servers from a single dashboard — without ever touching a YAML file.
+> **The missing UI for Claude Code.** Browse, edit, create, and rename your skills, MCP servers, and plugins from a single dashboard — without ever touching a YAML file.
 >
-> **First of its kind.** Skill marketplaces let you find skills. This lets you manage the ones you already have — locally, no account, no sync, no cloud.
+> **First of its kind.** Skill marketplaces let you find skills. This lets you manage everything you already have — locally, no account, no sync, no cloud.
 
 ![Demo](public/demo.gif)
 
@@ -10,7 +10,7 @@
 
 ## The problem it solves
 
-You've built 20+ Claude Code skills. They live in `~/.claude/skills/` as markdown files. To find one, you `ls`. To edit one, you `vim`. To check if two skills are fighting over the same trigger phrase — you guess.
+You've built 20+ Claude Code skills and installed a handful of plugins. They live scattered across `~/.claude/skills/` and `~/.claude/plugins/`. To find one, you `ls`. To edit one, you `vim`. To check if two skills are fighting over the same trigger phrase — you guess.
 
 **This fixes that.**
 
@@ -25,8 +25,13 @@ You've built 20+ Claude Code skills. They live in `~/.claude/skills/` as markdow
 
 | | |
 |---|---|
-| ![MCP Servers](public/screenshot-mcp.png) | ![Dark mode](public/screenshot-dark.png) |
-| **MCP server registry.** Green dot = command on PATH. Red = broken. Add/remove servers directly — secrets are always redacted. | **Dark mode.** Press `D`. Everything switches instantly and persists across sessions. |
+| ![MCP Servers](public/screenshot-mcp.png) | ![Plugins](public/screenshot-plugins.png) |
+| **MCP server registry.** Green dot = command on PATH. Red = broken. Add/remove servers directly — secrets are always redacted. | **Plugin browser.** Every installed plugin with auto-detected descriptions, skill chips, version badges, and a full detail modal with README. |
+
+| | |
+|---|---|
+| ![Plugin detail](public/screenshot-plugin-detail.png) | ![Dark mode](public/screenshot-dark.png) |
+| **Plugin detail modal.** Install path, git commit, install/update timestamps, and the full README rendered in-place. | **Dark mode.** Press `D`. Everything switches instantly and persists across sessions — status strip stays dark either way. |
 
 ---
 
@@ -54,8 +59,17 @@ You've built 20+ Claude Code skills. They live in `~/.claude/skills/` as markdow
 - Secret env vars (`TOKEN`, `KEY`, `SECRET`, `PASSWORD`, `AUTH`) always masked in the UI
 - `settings.json` backed up before every write
 
+**Plugin browser**
+- Reads `~/.claude/plugins/installed_plugins.json` — the Claude Code plugin registry
+- Auto-detects descriptions from `package.json` or first non-heading README line
+- Click any card to open a detail modal: install path, version, git commit SHA, timestamps, skill chips
+- README rendered inline with markdown — no need to open the file
+- Unregister plugins directly from the UI (backs up the registry first)
+- Scope badges: USER vs PROJECT, with project path shown
+
 **Quality of life**
 - Live UTC clock · dynamic version from `package.json` · refresh button
+- Status strip: skills count, MCP servers count, plugins count — all live
 - Keyboard shortcuts: `N` new · `/` search · `D` dark · `Esc` close · `?` help
 
 ---
@@ -99,6 +113,7 @@ npm run dev
 - Node.js 18+
 - `~/.claude/skills/` — created automatically by Claude Code
 - `~/.claude/settings.json` — for MCP server management
+- `~/.claude/plugins/installed_plugins.json` — for plugin browsing (created by `claude install`)
 
 ---
 
@@ -116,6 +131,9 @@ npm run dev
 | `POST` | `/api/mcp-servers` | Add server |
 | `DELETE` | `/api/mcp-servers/:name` | Remove server |
 | `GET` | `/api/mcp-servers/health` | Stdio health check |
+| `GET` | `/api/plugins` | List plugins with auto-detected descriptions |
+| `GET` | `/api/plugins/:id/readme` | Fetch plugin README content |
+| `DELETE` | `/api/plugins/:id` | Unregister plugin (backs up registry) |
 | `GET` | `/api/info` | App version |
 
 ---

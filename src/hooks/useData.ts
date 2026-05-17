@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import axios from 'axios'
-import type { Skill, McpServersMap } from '../types'
+import type { Skill, McpServersMap, Plugin } from '../types'
 
 export function useSkills() {
   const [skills, setSkills] = useState<Skill[]>([])
@@ -84,4 +84,32 @@ export function useMcpServers() {
   }
 
   return { servers, health, loading, error, refetch: fetchServers, addServer, removeServer }
+}
+
+export function usePlugins() {
+  const [plugins, setPlugins] = useState<Plugin[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchPlugins = useCallback(async () => {
+    setLoading(true)
+    try {
+      const { data } = await axios.get<Plugin[]>('/api/plugins')
+      setPlugins(data)
+      setError(null)
+    } catch (e) {
+      setError('Failed to load plugins')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchPlugins() }, [fetchPlugins])
+
+  const removePlugin = async (id: string) => {
+    await axios.delete(`/api/plugins/${encodeURIComponent(id)}`)
+    await fetchPlugins()
+  }
+
+  return { plugins, loading, error, removePlugin, refetch: fetchPlugins }
 }

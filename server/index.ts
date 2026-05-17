@@ -268,6 +268,143 @@ app.get('/api/mcp-servers/health', (_req, res) => {
   }
 })
 
+// ─── Plugins Routes ───────────────────────────────────────────────────────────
+
+const PLUGINS_JSON = path.join(os.homedir(), '.claude', 'plugins', 'installed_plugins.json')
+
+interface RawPluginEntry {
+  scope: 'user' | 'project'
+  projectPath?: string
+  installPath: string
+  version: string
+  installedAt: string
+  lastUpdated?: string
+  gitCommitSha?: string
+}
+
+function readPluginsJson(): { version: number; plugins: Record<string, RawPluginEntry[]> } {
+  if (!fs.existsSync(PLUGINS_JSON)) return { version: 2, plugins: {} }
+  try {
+    return JSON.parse(fs.readFileSync(PLUGINS_JSON, 'utf-8'))
+  } catch {
+    return { version: 2, plugins: {} }
+  }
+}
+
+function writePluginsJson(data: { version: number; plugins: Record<string, RawPluginEntry[]> }) {
+  const backup = PLUGINS_JSON + '.dashboard-backup'
+  if (fs.existsSync(PLUGINS_JSON)) {
+    fs.copyFileSync(PLUGINS_JSON, backup)
+  }
+  fs.writeFileSync(PLUGINS_JSON, JSON.stringify(data, null, 2), 'utf-8')
+}
+
+function getSkillNames(installPath: string): string[] {
+  const skillsDir = path.join(installPath, 'skills')
+  if (!fs.existsSync(skillsDir)) return []
+  try {
+    return fs.readdirSync(skillsDir).filter(name => {
+      try { return fs.statSync(path.join(skillsDir, name)).isDirectory() } catch { return false }
+    })
+  } catch {
+    return []
+  }
+}
+
+function getPluginDescription(installPath: string): string {
+  // 1. Try package.json description
+  const pkgPath = path.join(installPath, 'package.json')
+  if (fs.existsSync(pkgPath)) {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+      if (pkg.description && typeof pkg.description === 'string') return pkg.description
+    } catch { /* fall through */ }
+  }
+  // 2. Try first non-heading, non-empty line of README
+  const readmePath = path.join(installPath, 'README.md')
+  if (fs.existsSync(readmePath)) {
+    try {
+      const lines = fs.readFileSync(readmePath, 'utf-8').split('\n')
+      for (const line of lines) {
+        const trimmed = line.trim()
+        if (trimmed && !trimmed.startsWith('#') && !trimmed.startsWith('!') && !trimmed.startsWith('<')) {
+          return trimmed.replace(/^[>*_]+\s*/, '').slice(0, 160)
+        }
+      }
+    } catch { /* fall through */ }
+  }
+  return ''
+}
+
+app.get('/api/plugins', (_req, res) => {
+  try {
+    const data = readPluginsJson()
+    const result: unknown[] = []
+    for (const [id, entries] of Object.entries(data.plugins)) {
+      const atIdx = id.lastIndexOf('@')
+      const name = atIdx > 0 ? id.slice(0, atIdx) : id
+      const namespace = atIdx > 0 ? id.slice(atIdx + 1) : ''
+      for (const entry of entries) {
+        const installPath = entry.installPath || ''
+        // derive version from the last path segment (version directory) or fall back to field
+        const versionFromPath = installPath ? path.basename(installPath) : ''
+        const version = /^\d/.test(versionFromPath) ? versionFromPath : (entry.version || '')
+        result.push({
+          id,
+          name,
+          namespace,
+          version,
+          scope: entry.scope,
+          ...(entry.projectPath ? { projectPath: entry.projectPath } : {}),
+          installPath,
+          installedAt: entry.installedAt,
+          ...(entry.lastUpdated ? { lastUpdated: entry.lastUpdated } : {}),
+          ...(entry.gitCommitSha ? { gitCommitSha: entry.gitCommitSha } : {}),
+          description: getPluginDescription(installPath),
+          skills: getSkillNames(installPath),
+          hasReadme: fs.existsSync(path.join(installPath, 'README.md')),
+        })
+      }
+    }
+    res.json(result)
+  } catch (err) {
+    res.status(500).json({ error: String(err) })
+  }
+})
+
+app.get('/api/plugins/:id/readme', (req, res) => {
+  try {
+    const id = req.params.id
+    const data = readPluginsJson()
+    const entries = data.plugins[id]
+    if (!entries || entries.length === 0) return res.status(404).json({ error: 'Plugin not found' })
+    // return readme from first entry that has one
+    for (const entry of entries) {
+      const readmePath = path.join(entry.installPath, 'README.md')
+      if (fs.existsSync(readmePath)) {
+        const content = fs.readFileSync(readmePath, 'utf-8')
+        return res.json({ content })
+      }
+    }
+    return res.status(404).json({ error: 'README not found' })
+  } catch (err) {
+    res.status(500).json({ error: String(err) })
+  }
+})
+
+app.delete('/api/plugins/:id', (req, res) => {
+  try {
+    const id = req.params.id
+    const data = readPluginsJson()
+    if (!data.plugins[id]) return res.status(404).json({ error: 'Plugin not found' })
+    delete data.plugins[id]
+    writePluginsJson(data)
+    res.json({ ok: true })
+  } catch (err) {
+    res.status(500).json({ error: String(err) })
+  }
+})
+
 // ─── App Info ─────────────────────────────────────────────────────────────────
 
 app.get('/api/info', (_req, res) => {

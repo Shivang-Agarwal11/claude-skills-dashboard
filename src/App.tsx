@@ -3,10 +3,11 @@ import { SkillGrid } from './components/SkillGrid'
 import { SkillEditor } from './components/SkillEditor'
 import { SkillCreator } from './components/SkillCreator'
 import { McpServers } from './components/McpServers'
-import { useSkills, useMcpServers } from './hooks/useData'
+import { Plugins } from './components/Plugins'
+import { useSkills, useMcpServers, usePlugins } from './hooks/useData'
 import type { Skill } from './types'
 
-type Tab = 'skills' | 'mcp'
+type Tab = 'skills' | 'mcp' | 'plugins'
 
 function useAppVersion() {
   const [version, setVersion] = useState('…')
@@ -99,6 +100,7 @@ function HelpOverlay({ onClose }: { onClose: () => void }) {
 export default function App() {
   const { skills, loading, error: skillsError, updateSkill, createSkill, deleteSkill, renameSkill, refetch } = useSkills()
   const { servers, health: mcpHealth, loading: mcpLoading, error: mcpError, addServer, removeServer } = useMcpServers()
+  const { plugins, loading: pluginsLoading, error: pluginsError, removePlugin } = usePlugins()
   const [dark, setDark] = useDarkMode()
   const appVersion = useAppVersion()
 
@@ -183,6 +185,13 @@ export default function App() {
               MCP Servers
               <span className="nav-count">{Object.keys(servers).length}</span>
             </button>
+            <button
+              className={`nav-tab ${tab === 'plugins' ? 'active' : ''}`}
+              onClick={() => setTab('plugins')}
+            >
+              Plugins
+              <span className="nav-count">{plugins.length}</span>
+            </button>
           </nav>
         </div>
 
@@ -242,6 +251,10 @@ export default function App() {
           {Object.keys(servers).length} MCP servers
         </div>
         <div className="status-item">
+          <div className={`status-dot ${pluginsLoading ? 'amber' : ''}`} />
+          {pluginsLoading ? 'Loading…' : `${plugins.length} plugins`}
+        </div>
+        <div className="status-item">
           <div className="status-dot" />
           ~/.claude/skills
         </div>
@@ -249,10 +262,11 @@ export default function App() {
       </div>
 
       {/* ── Error banner ── */}
-      {(skillsError || mcpError) && (
+      {(skillsError || mcpError || pluginsError) && (
         <div className="error-strip">
           {skillsError && <span>■ SKILLS: {skillsError}</span>}
           {mcpError && <span>■ MCP: {mcpError}</span>}
+          {pluginsError && <span>■ PLUGINS: {pluginsError}</span>}
         </div>
       )}
 
@@ -263,6 +277,9 @@ export default function App() {
         )}
         {tab === 'mcp' && (
           <McpServers servers={servers} health={mcpHealth} loading={mcpLoading} onAdd={addServer} onRemove={removeServer} />
+        )}
+        {tab === 'plugins' && (
+          <Plugins plugins={plugins} loading={pluginsLoading} error={pluginsError} removePlugin={removePlugin} />
         )}
       </main>
 
