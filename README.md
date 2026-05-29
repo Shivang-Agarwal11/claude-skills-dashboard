@@ -12,7 +12,7 @@
 
 ### ⭐ If this tool saves you time, please star it on GitHub ⭐
 **It takes 2 seconds and helps other developers find it.**
-[![GitHub stars](https://img.shields.io/github/stars/YOUR_USERNAME/claude-skills-dashboard?style=social)](https://github.com/YOUR_USERNAME/claude-skills-dashboard)
+[![GitHub stars](https://img.shields.io/github/stars/Shivang-Agarwal11/claude-skills-dashboard?style=social)](https://github.com/Shivang-Agarwal11/claude-skills-dashboard)
 
 </div>
 
@@ -119,7 +119,7 @@ cp -r ~/Desktop/claude-skills-dashboard/skill ~/.claude/skills/skills-dashboard
 ### Manual
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/claude-skills-dashboard
+git clone https://github.com/Shivang-Agarwal11/claude-skills-dashboard
 cd claude-skills-dashboard
 npm install && npm run build && npm start
 # → http://localhost:7432
@@ -182,9 +182,9 @@ npm run dev
 <div align="center">
 
 ### ⭐ Star this repo — it's free and takes 2 seconds ⭐
-[![GitHub stars](https://img.shields.io/github/stars/YOUR_USERNAME/claude-skills-dashboard?style=social)](https://github.com/YOUR_USERNAME/claude-skills-dashboard)
+[![GitHub stars](https://img.shields.io/github/stars/Shivang-Agarwal11/claude-skills-dashboard?style=social)](https://github.com/Shivang-Agarwal11/claude-skills-dashboard)
 
-Found a bug or have a feature idea? [Open an issue](https://github.com/YOUR_USERNAME/claude-skills-dashboard/issues) — contributions welcome.
+Found a bug or have a feature idea? [Open an issue](https://github.com/Shivang-Agarwal11/claude-skills-dashboard/issues) — contributions welcome.
 
 </div>
 
