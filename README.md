@@ -8,7 +8,13 @@
 
 ---
 
-## If this saves you time, please give it a ⭐ star on GitHub — it helps others find it!
+<div align="center">
+
+### ⭐ If this tool saves you time, please star it on GitHub ⭐
+**It takes 2 seconds and helps other developers find it.**
+[![GitHub stars](https://img.shields.io/github/stars/YOUR_USERNAME/claude-skills-dashboard?style=social)](https://github.com/YOUR_USERNAME/claude-skills-dashboard)
+
+</div>
 
 ---
 
@@ -173,7 +179,13 @@ npm run dev
 
 ## Like what you see?
 
-If this tool saves you time, a **GitHub star** takes 2 seconds and helps others discover it.
-Found a bug or have a feature idea? Open an issue — contributions welcome.
+<div align="center">
+
+### ⭐ Star this repo — it's free and takes 2 seconds ⭐
+[![GitHub stars](https://img.shields.io/github/stars/YOUR_USERNAME/claude-skills-dashboard?style=social)](https://github.com/YOUR_USERNAME/claude-skills-dashboard)
+
+Found a bug or have a feature idea? [Open an issue](https://github.com/YOUR_USERNAME/claude-skills-dashboard/issues) — contributions welcome.
+
+</div>
 
 ---
