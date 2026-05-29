@@ -1,6 +1,6 @@
 # Skills Control Panel
 
-> **The missing UI for Claude Code.** Browse, edit, create, and rename your skills, MCP servers, and plugins from a single dashboard — without ever touching a YAML file.
+> **The missing UI for Claude Code.** Browse, edit, create, and rename your skills, agents, commands, MCP servers, and plugins from a single dashboard — without ever touching a YAML file.
 >
 > **First of its kind.** Skill marketplaces let you find skills. This lets you manage everything you already have — locally, no account, no sync, no cloud.
 
@@ -8,9 +8,13 @@
 
 ---
 
+## If this saves you time, please give it a ⭐ star on GitHub — it helps others find it!
+
+---
+
 ## The problem it solves
 
-You've built 20+ Claude Code skills and installed a handful of plugins. They live scattered across `~/.claude/skills/` and `~/.claude/plugins/`. To find one, you `ls`. To edit one, you `vim`. To check if two skills are fighting over the same trigger phrase — you guess.
+You've built 20+ Claude Code skills, defined custom agents, wired up slash commands, and installed a handful of plugins. They live scattered across `~/.claude/skills/`, `~/.claude/agents/`, and `~/.claude/plugins/`. To find one, you `ls`. To edit one, you `vim`. To check if two skills are fighting over the same trigger phrase — you guess.
 
 **This fixes that.**
 
@@ -30,6 +34,11 @@ You've built 20+ Claude Code skills and installed a handful of plugins. They liv
 
 | | |
 |---|---|
+| ![Agents tab](public/screenshot-agents.png) | ![Commands tab](public/screenshot-commands.png) |
+| **Agent browser.** All custom agents in `~/.claude/agents/` with role descriptions, tool permissions, and a detail modal for each definition. | **Commands browser.** Every slash command registered in your Claude Code config — name, description, binding, and the prompt body in one place. |
+
+| | |
+|---|---|
 | ![Plugin detail](public/screenshot-plugin-detail.png) | ![Dark mode](public/screenshot-dark.png) |
 | **Plugin detail modal.** Install path, git commit, install/update timestamps, and the full README rendered in-place. | **Dark mode.** Press `D`. Everything switches instantly and persists across sessions — status strip stays dark either way. |
 
@@ -37,7 +46,7 @@ You've built 20+ Claude Code skills and installed a handful of plugins. They liv
 
 ## Features
 
-**Skills grid**
+**Skills tab**
 - Health dot per skill — green when description + tools + triggers + body are all present
 - Sort by name, health ↑, health ↓, or **conflicts-first** (the most useful sort)
 - Filter by tool, invocability, or free-text across name + description + triggers
@@ -52,6 +61,18 @@ You've built 20+ Claude Code skills and installed a handful of plugins. They liv
 **Skill creator**
 - 5 starter templates: Research · Code Review · Debug · Deploy · Blank
 - Name validated on input — lowercase, numbers, hyphens only
+
+**Agents tab**
+- Reads all agent definitions from `~/.claude/agents/`
+- Displays agent name, description, tool permissions, and subagent type
+- Click any agent card to open a full detail modal with the complete agent configuration
+- Shows which tools each agent has access to via permission chips
+
+**Commands tab**
+- Lists every slash command registered across user and project settings
+- Shows command name, description, and the full prompt body
+- Distinguishes between built-in commands and custom user-defined commands
+- Filter and search across command names and descriptions
 
 **MCP server panel**
 - Reads and writes `~/.claude/settings.json` directly
@@ -69,7 +90,7 @@ You've built 20+ Claude Code skills and installed a handful of plugins. They liv
 
 **Quality of life**
 - Live UTC clock · dynamic version from `package.json` · refresh button
-- Status strip: skills count, MCP servers count, plugins count — all live
+- Status strip: skills count, agents count, commands count, MCP servers count, plugins count — all live
 - Keyboard shortcuts: `N` new · `/` search · `D` dark · `Esc` close · `?` help
 
 ---
@@ -112,7 +133,8 @@ npm run dev
 
 - Node.js 18+
 - `~/.claude/skills/` — created automatically by Claude Code
-- `~/.claude/settings.json` — for MCP server management
+- `~/.claude/agents/` — for agent browsing (created when you define custom agents)
+- `~/.claude/settings.json` — for MCP server management and commands
 - `~/.claude/plugins/installed_plugins.json` — for plugin browsing (created by `claude install`)
 
 ---
@@ -127,6 +149,9 @@ npm run dev
 | `PUT` | `/api/skills/:name` | Update skill |
 | `DELETE` | `/api/skills/:name` | Delete skill |
 | `POST` | `/api/skills/:name/rename` | Rename (atomic dir move + frontmatter patch) |
+| `GET` | `/api/agents` | List all custom agents |
+| `GET` | `/api/agents/:name` | Get one agent definition |
+| `GET` | `/api/commands` | List all registered slash commands |
 | `GET` | `/api/mcp-servers` | List servers (secrets redacted) |
 | `POST` | `/api/mcp-servers` | Add server |
 | `DELETE` | `/api/mcp-servers/:name` | Remove server |
@@ -143,5 +168,12 @@ npm run dev
 - All skill name inputs validated against `/^[a-z0-9-]+$/` — no path traversal possible
 - Secret env vars masked as `••••••••` in the UI, never sent to the frontend in plaintext
 - `settings.json` backed up to `settings.json.dashboard-backup` before every mutation
+
+---
+
+## Like what you see?
+
+If this tool saves you time, a **GitHub star** takes 2 seconds and helps others discover it.
+Found a bug or have a feature idea? Open an issue — contributions welcome.
 
 ---

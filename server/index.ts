@@ -10,6 +10,8 @@ app.use(cors())
 app.use(express.json())
 
 const SKILLS_DIR = path.join(os.homedir(), '.claude', 'skills')
+const AGENTS_DIR = path.join(os.homedir(), '.claude', 'agents')
+const COMMANDS_DIR = path.join(os.homedir(), '.claude', 'commands')
 const SETTINGS_PATH = path.join(os.homedir(), '.claude', 'settings.json')
 const IS_PROD = process.env.NODE_ENV === 'production'
 const DIST_DIR = path.join(__dirname, '..', 'dist')
@@ -162,6 +164,47 @@ app.delete('/api/skills/:name', (req, res) => {
   try {
     fs.rmSync(skillDir, { recursive: true, force: true })
     res.json({ ok: true })
+  } catch (err) {
+    res.status(500).json({ error: String(err) })
+  }
+})
+
+// ─── Agents & Commands Routes ─────────────────────────────────────────────────
+
+function readAgentMd(filePath: string, fileName: string) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf-8')
+    const fm = parseSkillMd(content)
+    const bodyMatch = content.match(/^---[\s\S]*?---\n([\s\S]*)$/)
+    const body = bodyMatch ? bodyMatch[1] : content
+    return {
+      name: fileName.replace(/\.md$/, ''),
+      description: (fm.description as string || '').replace(/\n/g, ' ').trim(),
+      tools: normalizeTools(fm.tools),
+      body,
+    }
+  } catch {
+    return null
+  }
+}
+
+app.get('/api/agents', (_req, res) => {
+  try {
+    if (!fs.existsSync(AGENTS_DIR)) return res.json([])
+    const files = fs.readdirSync(AGENTS_DIR).filter(f => f.endsWith('.md'))
+    const agents = files.map(f => readAgentMd(path.join(AGENTS_DIR, f), f)).filter(Boolean)
+    res.json(agents)
+  } catch (err) {
+    res.status(500).json({ error: String(err) })
+  }
+})
+
+app.get('/api/commands', (_req, res) => {
+  try {
+    if (!fs.existsSync(COMMANDS_DIR)) return res.json([])
+    const files = fs.readdirSync(COMMANDS_DIR).filter(f => f.endsWith('.md'))
+    const commands = files.map(f => readAgentMd(path.join(COMMANDS_DIR, f), f)).filter(Boolean)
+    res.json(commands)
   } catch (err) {
     res.status(500).json({ error: String(err) })
   }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import axios from 'axios'
-import type { Skill, McpServersMap, Plugin } from '../types'
+import type { Skill, McpServersMap, Plugin, Agent, Command } from '../types'
 
 export function useSkills() {
   const [skills, setSkills] = useState<Skill[]>([])
@@ -112,4 +112,50 @@ export function usePlugins() {
   }
 
   return { plugins, loading, error, removePlugin, refetch: fetchPlugins }
+}
+
+export function useAgents() {
+  const [agents, setAgents] = useState<Agent[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchAgents = useCallback(async () => {
+    setLoading(true)
+    try {
+      const { data } = await axios.get<Agent[]>('/api/agents')
+      setAgents(data)
+      setError(null)
+    } catch (e) {
+      setError('Failed to load agents')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchAgents() }, [fetchAgents])
+
+  return { agents, loading, error, refetch: fetchAgents }
+}
+
+export function useCommands() {
+  const [commands, setCommands] = useState<Command[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchCommands = useCallback(async () => {
+    setLoading(true)
+    try {
+      const { data } = await axios.get<Command[]>('/api/commands')
+      setCommands(data)
+      setError(null)
+    } catch (e) {
+      setError('Failed to load commands')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchCommands() }, [fetchCommands])
+
+  return { commands, loading, error, refetch: fetchCommands }
 }

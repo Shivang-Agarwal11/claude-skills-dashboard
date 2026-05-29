@@ -11,6 +11,15 @@ export interface Skill {
   files: string[]
 }
 
+export interface Agent {
+  name: string
+  description: string
+  tools: string[]
+  body: string
+}
+
+export type Command = Agent
+
 export interface McpServer {
   command?: string
   args?: string[]

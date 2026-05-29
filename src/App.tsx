@@ -4,10 +4,11 @@ import { SkillEditor } from './components/SkillEditor'
 import { SkillCreator } from './components/SkillCreator'
 import { McpServers } from './components/McpServers'
 import { Plugins } from './components/Plugins'
-import { useSkills, useMcpServers, usePlugins } from './hooks/useData'
+import { AgentGrid } from './components/AgentGrid'
+import { useSkills, useMcpServers, usePlugins, useAgents, useCommands } from './hooks/useData'
 import type { Skill } from './types'
 
-type Tab = 'skills' | 'mcp' | 'plugins'
+type Tab = 'skills' | 'agents' | 'commands' | 'mcp' | 'plugins'
 
 function useAppVersion() {
   const [version, setVersion] = useState('…')
@@ -101,6 +102,8 @@ export default function App() {
   const { skills, loading, error: skillsError, updateSkill, createSkill, deleteSkill, renameSkill, refetch } = useSkills()
   const { servers, health: mcpHealth, loading: mcpLoading, error: mcpError, addServer, removeServer } = useMcpServers()
   const { plugins, loading: pluginsLoading, error: pluginsError, removePlugin } = usePlugins()
+  const { agents, loading: agentsLoading, error: agentsError } = useAgents()
+  const { commands, loading: commandsLoading, error: commandsError } = useCommands()
   const [dark, setDark] = useDarkMode()
   const appVersion = useAppVersion()
 
@@ -179,6 +182,20 @@ export default function App() {
               <span className="nav-count">{skills.length}</span>
             </button>
             <button
+              className={`nav-tab ${tab === 'agents' ? 'active' : ''}`}
+              onClick={() => setTab('agents')}
+            >
+              Agents
+              <span className="nav-count">{agents.length}</span>
+            </button>
+            <button
+              className={`nav-tab ${tab === 'commands' ? 'active' : ''}`}
+              onClick={() => setTab('commands')}
+            >
+              Commands
+              <span className="nav-count">{commands.length}</span>
+            </button>
+            <button
               className={`nav-tab ${tab === 'mcp' ? 'active' : ''}`}
               onClick={() => setTab('mcp')}
             >
@@ -247,6 +264,14 @@ export default function App() {
           {loading ? 'Loading…' : `${skills.length} skills`}
         </div>
         <div className="status-item">
+          <div className={`status-dot ${agentsLoading ? 'amber' : ''}`} />
+          {agentsLoading ? 'Loading…' : `${agents.length} agents`}
+        </div>
+        <div className="status-item">
+          <div className={`status-dot ${commandsLoading ? 'amber' : ''}`} />
+          {commandsLoading ? 'Loading…' : `${commands.length} commands`}
+        </div>
+        <div className="status-item">
           <div className="status-dot" />
           {Object.keys(servers).length} MCP servers
         </div>
@@ -256,15 +281,17 @@ export default function App() {
         </div>
         <div className="status-item">
           <div className="status-dot" />
-          ~/.claude/skills
+          ~/.claude
         </div>
         <span className="status-ticker">v{appVersion}</span>
       </div>
 
       {/* ── Error banner ── */}
-      {(skillsError || mcpError || pluginsError) && (
+      {(skillsError || mcpError || pluginsError || agentsError || commandsError) && (
         <div className="error-strip">
           {skillsError && <span>■ SKILLS: {skillsError}</span>}
+          {agentsError && <span>■ AGENTS: {agentsError}</span>}
+          {commandsError && <span>■ COMMANDS: {commandsError}</span>}
           {mcpError && <span>■ MCP: {mcpError}</span>}
           {pluginsError && <span>■ PLUGINS: {pluginsError}</span>}
         </div>
@@ -274,6 +301,12 @@ export default function App() {
       <main className="app-main">
         {tab === 'skills' && (
           <SkillGrid skills={skills} loading={loading} onEdit={setEditingSkill} onDelete={handleDelete} />
+        )}
+        {tab === 'agents' && (
+          <AgentGrid items={agents} loading={agentsLoading} kind="agent" />
+        )}
+        {tab === 'commands' && (
+          <AgentGrid items={commands} loading={commandsLoading} kind="command" />
         )}
         {tab === 'mcp' && (
           <McpServers servers={servers} health={mcpHealth} loading={mcpLoading} onAdd={addServer} onRemove={removeServer} />
